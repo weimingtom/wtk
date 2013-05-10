@@ -1,0 +1,7 @@
+ifeq (@(WTK_BUILD),debug)
+SUFFIX = -dbg
+LIB_SUFFIX = -dbg
+endif
+
+SUFFIX = $(SUFFIX)-@(TUP_ARCH)
+LIB_SUFFIX = $(LIB_SUFFIX)-@(TUP_ARCH)

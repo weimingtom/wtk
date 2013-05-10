@@ -1,0 +1,12 @@
+include_rules
+
+preload src/
+preload src/wtk
+
+OBJS = src/*.o
+OBJS += src/wtk/*.o
+
+include prefix.tup
+include suffix.tup
+
+: $(OBJS) |> !ar |> $(PREFIX)wtk$(SUFFIX)$(LIB_EXT)

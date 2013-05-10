@@ -1,0 +1,5 @@
+ifeq (@(TUP_PLATFORM),win32)
+PREFIX =
+else
+PREFIX = lib
+endif
