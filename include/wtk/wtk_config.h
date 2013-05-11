@@ -1,5 +1,5 @@
-// =============================================================================
-// This file is part of the Windowing Toolkit.
+// This file is part of the minimalistic Windowing Toolkit.
+//
 // Copyright (C) 2012 Michael Williams <devbug@bitbyte.ca>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,21 +19,25 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// =============================================================================
 
 #ifndef _WTK_CONFIG_H_
 #define _WTK_CONFIG_H_
 
-#if defined(WTK_DLL) && defined(_WIN32)
-    #if defined(WTK_BUILD)
-        #define WTK_EXPORT __declspec(dllexport)
-    #else
-        #define WTK_EXPORT __declspec(dllimport)
-    #endif
+#include <wtk/wtk_foundation.h>
+
+// Uncomment this if you're linking to this library dynamically.
+// #define WTK_DYNAMICALLY_LINKED 1
+
+#if defined(WTK_DYNAMICALLY_LINKED)
+  #if defined(WTK_BUILDING)
+    #define WTK_EXPORT FOUNDATION_DYNAMIC_EXPORT
+  #else
+    #define WTK_EXPORT FOUNDATION_DYNAMIC_IMPORT
+  #endif
 #else
-    #define WTK_EXPORT
+  #define WTK_EXPORT
 #endif
 
-#define WTK_API __cdecl
+#define WTK_API FOUNDATION_CDECL
 
 #endif // _WTK_CONFIG_H_

@@ -8,5 +8,24 @@ OBJS += src/wtk/*.o
 
 include prefix.tup
 include suffix.tup
+include deps.tup
+
+OBJS += $(WTK_DEPENDENCIES)
+LIBS = $(WTK_LIBS)
 
 : $(OBJS) |> !ar |> $(PREFIX)wtk$(SUFFIX)$(LIB_EXT)
+
+
+preload sample
+
+OBJS = sample/*.o
+
+include prefix.tup
+include suffix.tup
+include deps.tup
+
+OBJS += $(WTK_DEPENDENCIES)
+OBJS += $(PREFIX)wtk$(SUFFIX)$(LIB_EXT)
+LIBS = $(WTK_LIBS)
+
+: $(OBJS) |> !exe |> wtk-sample$(SUFFIX)$(EXE_EXT)

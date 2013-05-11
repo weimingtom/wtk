@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <wtk/wtk_label.h>
+#include <wtk/wtk_button.h>
 
 #include "_wtk_windows.h"
 #include "_wtk_controls.h"
@@ -34,35 +34,36 @@
 #include <wtk/wtk_mouse.h>
 #include <wtk/wtk_keyboard.h>
 
-static LRESULT CALLBACK wtk_label_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static LRESULT CALLBACK wtk_button_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
-int WTK_API wtk_label_init()
+int WTK_API wtk_button_init()
 {
     return TRUE;
 }
 
-struct wtk_label* WTK_API wtk_label_create( int x, int y, int width, int height, struct wtk_control* parent )
+struct wtk_button* WTK_API wtk_button_create( int x, int y, int width, int height, struct wtk_control* parent )
 {
-    struct wtk_label* label = NULL;
+    struct wtk_button* button = NULL;
     HWND hWnd;
 
     WTK_ASSERT(parent);
 
-    hWnd = CreateWindowExA(0, "STATIC", NULL, SS_LEFT | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
+    hWnd = CreateWindowExA(0, "BUTTON", NULL, BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    label = wtk_alloc(sizeof(struct wtk_label));
-    memset((void*)label, 0, sizeof(struct wtk_label));
-    label->control.type = WTK_CONTROL_TYPE(Label);
-    label->control.hWnd = hWnd;
-    label->control.font = wtk_font_default();
-    label->text_align = WTK_ALIGN(Left);
+    button = (struct wtk_button*)wtk_alloc(sizeof(struct wtk_button));
+    memset((void*)button, 0, sizeof(struct wtk_button));
+    button->control.type = WTK_CONTROL_TYPE(Button);
+    button->control.hWnd = hWnd;
+    button->control.font = wtk_font_default();
+    button->text_h_align = WTK_ALIGN(Left);
+    button->text_v_align = WTK_ALIGN(Middle);
 
-    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_label_proc));
-    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)label);
-    PostMessage(hWnd, WM_SETFONT, (WPARAM)label->control.font->hFont, TRUE);
+    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_button_proc));
+    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)button);
+    PostMessage(hWnd, WM_SETFONT, (WPARAM)button->control.font->hFont, TRUE);
     PostMessage(hWnd, WTK_ON_CREATE, 0, 0);
-    return label;
+    return button;
 }
 
 static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
@@ -70,10 +71,10 @@ static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
     return TRUE;
 }
 
-static LRESULT CALLBACK wtk_label_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static LRESULT CALLBACK wtk_button_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     struct wtk_control* control = (struct wtk_control*)GetPropA(hWnd, "_wtk_ctrl_ptr");
-    struct wtk_label* label = (struct wtk_label*)control;
+    struct wtk_button* button = (struct wtk_button*)control;
     if( !control ) return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     switch( uMsg ) {
@@ -91,7 +92,7 @@ static LRESULT CALLBACK wtk_label_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 
         case WM_DESTROY: {
             if( control->on_destroy_callback ) control->on_destroy_callback(control, WTK_EVENT(OnDestroy));
-            wtk_free(label);
+            wtk_free(button);
         } break;
 
         case WM_LBUTTONDOWN: {

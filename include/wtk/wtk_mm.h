@@ -24,8 +24,8 @@
 #ifndef _WTK_MM_H_
 #define _WTK_MM_H_
 
+#include <wtk/wtk_foundation.h>
 #include <wtk/wtk_config.h>
-#include <wtk/wtk_compat.h>
 
 #ifdef __cplusplus
 extern "C" {

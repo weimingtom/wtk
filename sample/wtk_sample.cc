@@ -10,10 +10,6 @@ static wtk_label* mirror_label;
 static wtk_checkbox* mirror_checkbox;
 static wtk_textbox* mirror_textbox;
 
-static const struct wtk_allocator allocator = {
-    &wtk_alloc_callback, &wtk_realloc_callback, &wtk_free_callback
-};
-
 static int WTK_API exit_on_clicked( wtk_menu_item* menu_item, wtk_event event )
 {
     wtk_quit();
@@ -147,6 +143,10 @@ int main( int argc, char** argv )
     wtk_listbox*   listbox;
     wtk_listview*  listview;
     wtk_combobox*  combobox;
+
+    const struct wtk_allocator allocator = {
+        &wtk_alloc_callback, &wtk_realloc_callback, &wtk_free_callback
+    };
 
     if( !wtk_init(&allocator) ) return EXIT_FAILURE;
 

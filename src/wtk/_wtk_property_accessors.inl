@@ -424,9 +424,9 @@ static void WTK_API wtk_prop_text_getter( struct wtk_control* control, va_list a
             // TODO: Find a more performant, and thread safe way.
             struct wtk_textbox* textbox = ((struct wtk_textbox*)control);
             int text_len = GetWindowTextLength(control->hWnd);
-            textbox->text_buffer = wtk_realloc(textbox->text_buffer, text_len + 1);
-            memset(textbox->text_buffer, 0, text_len + 1);
-            GetWindowTextA(control->hWnd, textbox->text_buffer, text_len + 1);
+            textbox->text_buffer = (const char*)wtk_realloc((void*)textbox->text_buffer, text_len + 1);
+            memset((void*)textbox->text_buffer, 0, text_len + 1);
+            GetWindowTextA(control->hWnd, (LPSTR)textbox->text_buffer, text_len + 1);
             *out = textbox->text_buffer;
         } break;
     }

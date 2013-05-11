@@ -29,7 +29,7 @@
 
 static void WTK_API wtk_event_on_create_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_create_callback = callback;
+    *((void**)&control->on_create_callback) = callback;
 }
 
 // =============================================================================
@@ -38,7 +38,7 @@ static void WTK_API wtk_event_on_create_setter( struct wtk_control* control, wtk
 
 static void WTK_API wtk_event_on_destroy_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_destroy_callback = callback;
+    *((void**)&control->on_destroy_callback) = callback;
 }
 
 // =============================================================================
@@ -47,7 +47,7 @@ static void WTK_API wtk_event_on_destroy_setter( struct wtk_control* control, wt
 
 static void WTK_API wtk_event_on_layout_changed_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_layout_changed_callback = callback;
+    *((void**)&control->on_layout_changed_callback) = callback;
 }
 
 // =============================================================================
@@ -57,7 +57,7 @@ static void WTK_API wtk_event_on_layout_changed_setter( struct wtk_control* cont
 static void WTK_API wtk_event_on_close_setter( struct wtk_control* control, wtk_event_callback callback )
 {
     WTK_ASSERT(control->type == WTK_CONTROL_TYPE(Window));
-    ((struct wtk_window*)control)->on_close_callback = callback;
+    *((void**)&((struct wtk_window*)control)->on_close_callback) = callback;
 }
 
 // =============================================================================
@@ -66,7 +66,7 @@ static void WTK_API wtk_event_on_close_setter( struct wtk_control* control, wtk_
 
 static void WTK_API wtk_event_on_paint_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_paint_callback = callback;
+    *((void**)&control->on_paint_callback) = callback;
 }
 
 // =============================================================================
@@ -82,11 +82,11 @@ static void WTK_API wtk_event_on_value_changed_setter( struct wtk_control* contr
 
     switch( control->type ) {
         case WTK_CONTROL_TYPE(CheckBox): {
-            ((struct wtk_checkbox*)control)->on_value_changed_callback = callback;
+            *((void**)&((struct wtk_checkbox*)control)->on_value_changed_callback) = callback;
         } break;
 
         case WTK_CONTROL_TYPE(TextBox): {
-            ((struct wtk_textbox*)control)->on_value_changed_callback = callback;
+            *((void**)&((struct wtk_textbox*)control)->on_value_changed_callback) = callback;
         } break;
     }
 }
@@ -104,11 +104,11 @@ static void WTK_API wtk_event_on_selection_changed_setter( struct wtk_control* c
 
     switch( control->type ) {
         case WTK_CONTROL_TYPE(ListBox): {
-            ((struct wtk_listbox*)control)->on_selection_changed_callback = callback;
+            *((void**)&((struct wtk_listbox*)control)->on_selection_changed_callback) = callback;
         } break;
 
         case WTK_CONTROL_TYPE(ComboBox): {
-            ((struct wtk_combobox*)control)->on_selection_changed_callback = callback;
+            *((void**)&((struct wtk_combobox*)control)->on_selection_changed_callback) = callback;
         } break;
     }
 }
@@ -119,7 +119,7 @@ static void WTK_API wtk_event_on_selection_changed_setter( struct wtk_control* c
 
 static void WTK_API wtk_event_on_pressed_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_pressed_callback = callback;
+    *((void**)&control->on_pressed_callback) = callback;
 }
 
 // =============================================================================
@@ -128,7 +128,7 @@ static void WTK_API wtk_event_on_pressed_setter( struct wtk_control* control, wt
 
 static void WTK_API wtk_event_on_released_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_released_callback = callback;
+    *((void**)&control->on_released_callback) = callback;
 }
 
 // =============================================================================
@@ -137,7 +137,7 @@ static void WTK_API wtk_event_on_released_setter( struct wtk_control* control, w
 
 static void WTK_API wtk_event_on_clicked_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_clicked_callback = callback;
+    *((void**)&control->on_clicked_callback) = callback;
 }
 
 // =============================================================================
@@ -146,7 +146,7 @@ static void WTK_API wtk_event_on_clicked_setter( struct wtk_control* control, wt
 
 static void WTK_API wtk_event_on_mouse_moved_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_mouse_moved_callback = callback;
+    *((void**)&control->on_mouse_moved_callback) = callback;
 }
 
 // =============================================================================
@@ -155,7 +155,7 @@ static void WTK_API wtk_event_on_mouse_moved_setter( struct wtk_control* control
 
 static void WTK_API wtk_event_on_key_pressed_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_key_pressed_callback = callback;
+    *((void**)&control->on_key_pressed_callback) = callback;
 }
 
 // =============================================================================
@@ -164,7 +164,7 @@ static void WTK_API wtk_event_on_key_pressed_setter( struct wtk_control* control
 
 static void WTK_API wtk_event_on_key_released_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_key_released_callback = callback;
+    *((void**)&control->on_key_released_callback) = callback;
 }
 
 // =============================================================================
@@ -173,7 +173,7 @@ static void WTK_API wtk_event_on_key_released_setter( struct wtk_control* contro
 
 static void WTK_API wtk_event_on_mouse_scrolled_setter( struct wtk_control* control, wtk_event_callback callback )
 {
-    control->on_mouse_scrolled_callback = callback;
+    *((void**)&control->on_mouse_scrolled_callback) = callback;
 }
 
 // =============================================================================
@@ -183,7 +183,7 @@ static void WTK_API wtk_event_on_mouse_scrolled_setter( struct wtk_control* cont
 static void WTK_API wtk_event_on_minimized_setter( struct wtk_control* control, wtk_event_callback callback )
 {
     WTK_ASSERT(control->type == WTK_CONTROL_TYPE(Window));
-    ((struct wtk_window*)control)->on_minimized_callback = callback;
+    *((void**)&((struct wtk_window*)control)->on_minimized_callback) = callback;
 }
 
 // =============================================================================
@@ -193,7 +193,7 @@ static void WTK_API wtk_event_on_minimized_setter( struct wtk_control* control, 
 static void WTK_API wtk_event_on_maximized_setter( struct wtk_control* control, wtk_event_callback callback )
 {
     WTK_ASSERT(control->type == WTK_CONTROL_TYPE(Window));
-    ((struct wtk_window*)control)->on_maximized_callback = callback;
+    *((void**)&((struct wtk_window*)control)->on_maximized_callback) = callback;
 }
 
 // =============================================================================
@@ -203,5 +203,5 @@ static void WTK_API wtk_event_on_maximized_setter( struct wtk_control* control, 
 static void WTK_API wtk_event_on_resized_setter( struct wtk_control* control, wtk_event_callback callback )
 {
     WTK_ASSERT(control->type == WTK_CONTROL_TYPE(Window));
-    ((struct wtk_window*)control)->on_resized_callback = callback;
+    *((void**)&((struct wtk_window*)control)->on_resized_callback) = callback;
 }

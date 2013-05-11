@@ -1,0 +1,6 @@
+include suffix.tup
+include @(WTK_FOUNDATION_PATH)/deps.tup
+WTK_DEPENDENCIES = $(FOUNDATION_DEPENDENCIES) @(WTK_FOUNDATION_PATH)/foundation$(LIB_SUFFIX)$(LIB_EXT)
+ifeq (@(TUP_PLATFORM),win32)
+  WTK_LIBS = $(FOUNDATION_LIBS) comctl32.lib
+endif

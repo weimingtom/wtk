@@ -22,34 +22,40 @@
 // =============================================================================
 
 #include <wtk/wtk_mm.h>
+#include <wtk/wtk_assert.h>
 
-static const struct wtk_allocator* _allocator = NULL;
+static struct wtk_allocator _allocator = {
+  NULL, NULL, NULL
+};
 
 void WTK_API wtk_set_allocator( const struct wtk_allocator* allocator )
 {
-    _allocator = allocator;
+    WTK_ASSERT(allocator != NULL);
+    _allocator.alloc_callback = allocator->alloc_callback;
+    _allocator.realloc_callback = allocator->realloc_callback;
+    _allocator.free_callback = allocator->free_callback;
 }
 
 const struct wtk_allocator* wtk_get_allocator()
 {
-    return _allocator;
+    return &_allocator;
 }
 
 void* WTK_API wtk_alloc( size_t num_bytes )
 {
-    WTK_ASSERT(_allocator);
-    return _allocator->alloc_callback(num_bytes);
+    WTK_ASSERT(_allocator.alloc_callback != NULL);
+    return _allocator.alloc_callback(num_bytes);
 }
 
 void* WTK_API wtk_realloc( void* ptr, size_t num_bytes )
 {
-    WTK_ASSERT(_allocator);
-    return _allocator->realloc_callback(ptr, num_bytes);
+    WTK_ASSERT(_allocator.realloc_callback != NULL);
+    return _allocator.realloc_callback(ptr, num_bytes);
 }
 
 void WTK_API wtk_free( void* ptr )
 {
-    WTK_ASSERT(_allocator);
     WTK_ASSERT(ptr);
-    _allocator->free_callback(ptr);
+    WTK_ASSERT(_allocator.free_callback != NULL);
+    _allocator.free_callback(ptr);
 }

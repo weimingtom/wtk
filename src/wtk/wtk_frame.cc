@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <wtk/wtk_listbox.h>
+#include <wtk/wtk_frame.h>
 
 #include "_wtk_windows.h"
 #include "_wtk_controls.h"
@@ -29,57 +29,36 @@
 #include "_wtk_layout.h"
 
 #include <wtk/wtk_mm.h>
-#include <wtk/wtk_align.h>
 #include <wtk/wtk_font.h>
 
-static LRESULT CALLBACK wtk_listbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static LRESULT CALLBACK wtk_frame_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
-int WTK_API wtk_listbox_init()
+int WTK_API wtk_frame_init()
 {
     return TRUE;
 }
 
-struct wtk_listbox* WTK_API wtk_listbox_create( int x, int y, int width, int height, struct wtk_control* parent )
+struct wtk_frame* WTK_API wtk_frame_create( int x, int y, int width, int height, struct wtk_control* parent )
 {
-    struct wtk_listbox* listbox = NULL;
+    struct wtk_frame* frame = NULL;
     HWND hWnd;
 
     WTK_ASSERT(parent);
 
-    hWnd = CreateWindowExA(0, "LISTBOX", NULL, LBS_HASSTRINGS | WS_BORDER | LBS_NOTIFY | WS_VSCROLL | WS_HSCROLL | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
+    hWnd = CreateWindowExA(0, "BUTTON", NULL, BS_GROUPBOX | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    listbox = wtk_alloc(sizeof(struct wtk_listbox));
-    memset((void*)listbox, 0, sizeof(struct wtk_listbox));
-    listbox->control.type = WTK_CONTROL_TYPE(ListBox);
-    listbox->control.hWnd = hWnd;
-    listbox->control.font = wtk_font_default();
+    frame = (struct wtk_frame*)wtk_alloc(sizeof(struct wtk_frame));
+    memset((void*)frame, 0, sizeof(struct wtk_frame));
+    frame->control.type = WTK_CONTROL_TYPE(Frame);
+    frame->control.hWnd = hWnd;
+    frame->control.font = wtk_font_default();
 
-    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_listbox_proc));
-    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)listbox);
-    PostMessage(hWnd, WM_SETFONT, (WPARAM)listbox->control.font->hFont, TRUE);
+    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_frame_proc));
+    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)frame);
+    PostMessage(hWnd, WM_SETFONT, (WPARAM)frame->control.font->hFont, TRUE);
     PostMessage(hWnd, WTK_ON_CREATE, 0, 0);
-    return listbox;
-}
-
-wtk_listbox_item WTK_API wtk_listbox_insert( struct wtk_listbox* listbox, const char* text, void* user_ptr )
-{
-    LRESULT result;
-
-    WTK_ASSERT(listbox);
-
-    result = SendMessage(listbox->control.hWnd, LB_ADDSTRING, 0, (LPARAM)text);
-    if( result == LB_ERR || result == LB_ERRSPACE ) return 0;
-    SendMessage(listbox->control.hWnd, LB_SETITEMDATA, (WPARAM)result, (LPARAM)user_ptr);
-    return (wtk_listbox_item)(result + 1);
-}
-
-void WTK_API wtk_listbox_remove( struct wtk_listbox* listbox, wtk_listbox_item id )
-{
-    WTK_ASSERT(listbox);
-    WTK_ASSERT(id != 0);
-
-    SendMessage(listbox->control.hWnd, LB_DELETESTRING, (WPARAM)(id - 1), 0);
+    return frame;
 }
 
 static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
@@ -87,10 +66,10 @@ static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
     return TRUE;
 }
 
-static LRESULT CALLBACK wtk_listbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static LRESULT CALLBACK wtk_frame_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     struct wtk_control* control = (struct wtk_control*)GetPropA(hWnd, "_wtk_ctrl_ptr");
-    struct wtk_listbox* listbox = (struct wtk_listbox*)control;
+    struct wtk_frame* frame = (struct wtk_frame*)control;
     if( !control ) return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     switch( uMsg ) {
@@ -108,7 +87,7 @@ static LRESULT CALLBACK wtk_listbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, L
 
         case WM_DESTROY: {
             if( control->on_destroy_callback ) control->on_destroy_callback(control, WTK_EVENT(OnDestroy));
-            wtk_free(listbox);
+            wtk_free(frame);
         } break;
 
         default: {

@@ -110,9 +110,9 @@ static void WTK_API wtk_child_prop_text_getter( struct wtk_control* control, wtk
 
             WTK_ASSERT(child > 0);
 
-            listbox->text_buffer = wtk_realloc(listbox->text_buffer, text_len + 1);
-            memset(listbox->text_buffer, 0, text_len + 1);
-            GetWindowTextA(control->hWnd, listbox->text_buffer, text_len + 1);
+            listbox->text_buffer = (const char*)wtk_realloc((void*)listbox->text_buffer, text_len + 1);
+            memset((void*)listbox->text_buffer, 0, text_len + 1);
+            GetWindowTextA(control->hWnd, (LPSTR)listbox->text_buffer, text_len + 1);
             *va_arg(args, const char**) = listbox->text_buffer;
         } break;
 
@@ -126,9 +126,9 @@ static void WTK_API wtk_child_prop_text_getter( struct wtk_control* control, wtk
 
             WTK_ASSERT(child > 0);
 
-            combobox->text_buffer = wtk_realloc(combobox->text_buffer, text_len + 1);
-            memset(combobox->text_buffer, 0, text_len + 1);
-            GetWindowTextA(control->hWnd, combobox->text_buffer, text_len + 1);
+            combobox->text_buffer = (const char*)wtk_realloc((void*)combobox->text_buffer, text_len + 1);
+            memset((void*)combobox->text_buffer, 0, text_len + 1);
+            GetWindowTextA(control->hWnd, (LPSTR)combobox->text_buffer, text_len + 1);
             *va_arg(args, const char**) = combobox->text_buffer;
         } break;
     }
@@ -159,14 +159,14 @@ static void WTK_API wtk_child_prop_text_setter( struct wtk_control* control, wtk
             if( child > 0 ) {
                 LVCOLUMN lvc;
                 lvc.mask = LVCF_TEXT;
-                lvc.pszText = va_arg(args, const char*);
+                lvc.pszText = va_arg(args, LPSTR);
                 ListView_SetColumn(control->hWnd, (int)(child - 1), &lvc);
             } else {
                 LVITEM lvi;
                 lvi.mask = LVIF_TEXT;
                 lvi.iItem = -((int)child) - 1;
                 lvi.iSubItem = va_arg(args, wtk_listview_column) - 1;
-                lvi.pszText = va_arg(args, const char*);
+                lvi.pszText = va_arg(args, LPSTR);
                 ListView_SetItem(control->hWnd, &lvi);
             }
         } break;

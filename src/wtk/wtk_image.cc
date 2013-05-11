@@ -43,7 +43,7 @@ struct wtk_image* WTK_API wtk_image_create_from_file( const char* file_path, int
                         LR_LOADFROMFILE);
     if( !hImage ) return NULL;
 
-    image = wtk_alloc(sizeof(struct wtk_image));
+    image = (struct wtk_image*)wtk_alloc(sizeof(struct wtk_image));
     memset((void*)image, 0, sizeof(struct wtk_image));
     image->hImage = hImage;
     return image;
@@ -52,7 +52,7 @@ struct wtk_image* WTK_API wtk_image_create_from_file( const char* file_path, int
 void WTK_API wtk_image_destroy( struct wtk_image* image )
 {
     WTK_ASSERT(image);
-    DeleteObject(image->hImage);
+    DeleteObject((HBITMAP)image->hImage);
     wtk_free(image);
 }
 
@@ -81,7 +81,7 @@ struct wtk_icon* WTK_API wtk_icon_create_from_file( const char* file_path, int w
                         LR_LOADFROMFILE);
     if( !hIcon ) return NULL;
 
-    icon = wtk_alloc(sizeof(struct wtk_icon));
+    icon = (struct wtk_icon*)wtk_alloc(sizeof(struct wtk_icon));
     memset((void*)icon, 0, sizeof(struct wtk_icon));
     icon->hIcon = hIcon;
     return icon;
@@ -90,7 +90,7 @@ struct wtk_icon* WTK_API wtk_icon_create_from_file( const char* file_path, int w
 void WTK_API wtk_icon_destroy( struct wtk_icon* icon )
 {
     WTK_ASSERT(icon);
-    DestroyIcon(icon->hIcon);
+    DestroyIcon((HICON)icon->hIcon);
     wtk_free(icon);
 }
 

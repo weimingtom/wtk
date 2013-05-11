@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <wtk/wtk_combobox.h>
+#include <wtk/wtk_textbox.h>
 
 #include "_wtk_windows.h"
 #include "_wtk_controls.h"
@@ -31,55 +31,41 @@
 #include <wtk/wtk_mm.h>
 #include <wtk/wtk_align.h>
 #include <wtk/wtk_font.h>
+#include <wtk/wtk_mouse.h>
+#include <wtk/wtk_keyboard.h>
 
-static LRESULT CALLBACK wtk_combobox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static LRESULT CALLBACK wtk_textbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
-int WTK_API wtk_combobox_init()
+int WTK_API wtk_textbox_init()
 {
     return TRUE;
 }
 
-struct wtk_combobox* WTK_API wtk_combobox_create( int x, int y, int width, int height, struct wtk_control* parent )
+struct wtk_textbox* WTK_API wtk_textbox_create( int x, int y, int width, int height, unsigned multiline, struct wtk_control* parent )
 {
-    struct wtk_combobox* combobox = NULL;
+    struct wtk_textbox* textbox = NULL;
     HWND hWnd;
 
     WTK_ASSERT(parent);
 
-    hWnd = CreateWindowExA(0, "COMBOBOX", NULL, CBS_HASSTRINGS | CBS_DROPDOWNLIST | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
+    hWnd = CreateWindowExA(0, "EDIT", NULL, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_VISIBLE | WS_CHILD | (multiline ? ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN : 0), x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    combobox = wtk_alloc(sizeof(struct wtk_combobox));
-    memset((void*)combobox, 0, sizeof(struct wtk_combobox));
-    combobox->control.type = WTK_CONTROL_TYPE(ComboBox);
-    combobox->control.hWnd = hWnd;
-    combobox->control.font = wtk_font_default();
+    textbox = (struct wtk_textbox*)wtk_alloc(sizeof(struct wtk_textbox));
+    memset((void*)textbox, 0, sizeof(struct wtk_textbox));
+    textbox->control.type = WTK_CONTROL_TYPE(TextBox);
+    textbox->control.hWnd = hWnd;
+    textbox->control.font = wtk_font_default();
+    textbox->text_buffer = NULL;
+    textbox->type = WTK_TEXTBOX_TYPE(Plaintext);
+    textbox->text_align = WTK_ALIGN(Left);
+    textbox->max_len = -1;
 
-    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_combobox_proc));
-    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)combobox);
-    PostMessage(hWnd, WM_SETFONT, (WPARAM)combobox->control.font->hFont, TRUE);
+    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_textbox_proc));
+    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)textbox);
+    PostMessage(hWnd, WM_SETFONT, (WPARAM)textbox->control.font->hFont, TRUE);
     PostMessage(hWnd, WTK_ON_CREATE, 0, 0);
-    return combobox;
-}
-
-wtk_combobox_item WTK_API wtk_combobox_insert( struct wtk_combobox* combobox, const char* text, void* user_ptr )
-{
-    LRESULT result;
-
-    WTK_ASSERT(combobox);
-
-    result = SendMessage(combobox->control.hWnd, CB_ADDSTRING, 0, (LPARAM)text);
-    if( result == CB_ERR || result == CB_ERRSPACE ) return 0;
-    SendMessage(combobox->control.hWnd, CB_SETITEMDATA, (WPARAM)result, (LPARAM)user_ptr);
-    return (wtk_combobox_item)(result + 1);
-}
-
-void WTK_API wtk_combobox_remove( struct wtk_combobox* combobox, wtk_combobox_item id )
-{
-    WTK_ASSERT(combobox);
-    WTK_ASSERT(id != 0);
-
-    SendMessage(combobox->control.hWnd, CB_DELETESTRING, (WPARAM)(id - 1), 0);
+    return textbox;
 }
 
 static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
@@ -87,17 +73,15 @@ static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
     return TRUE;
 }
 
-static LRESULT CALLBACK wtk_combobox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static LRESULT CALLBACK wtk_textbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     struct wtk_control* control = (struct wtk_control*)GetPropA(hWnd, "_wtk_ctrl_ptr");
-    struct wtk_combobox* combobox = (struct wtk_combobox*)control;
+    struct wtk_textbox* textbox = (struct wtk_textbox*)control;
     if( !control ) return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     switch( uMsg ) {
         case WTK_ON_CREATE: {
-            HWND hWndParent = GetParent(hWnd);
             if( control->on_create_callback ) control->on_create_callback(control, WTK_EVENT(OnCreate));
-            if( hWndParent ) SendMessage(hWndParent, WTK_ON_LAYOUT_CHANGED, 0, 0);
         } break;
 
         case WTK_ON_LAYOUT_CHANGED: {
@@ -108,7 +92,8 @@ static LRESULT CALLBACK wtk_combobox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, 
 
         case WM_DESTROY: {
             if( control->on_destroy_callback ) control->on_destroy_callback(control, WTK_EVENT(OnDestroy));
-            wtk_free(combobox);
+            wtk_free((void*)textbox->text_buffer);
+            wtk_free((void*)textbox);
         } break;
 
         default: {

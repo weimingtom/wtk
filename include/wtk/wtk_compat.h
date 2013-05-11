@@ -24,25 +24,7 @@
 #ifndef _WTK_COMPAT_H_
 #define _WTK_COMPAT_H_
 
-#if defined(_MSC_VER)
-    #include <wtk/_msvc_stdint.h>
-    #include <wtk/_msvc_inttypes.h>
-#else
-    #include <stdint.h>
-    #include <inttypes.h>
-#endif
-
-#include <stdlib.h>
-#include <string.h>
-
-#ifndef TRUE
-    #define TRUE 1
-#endif
-
-#ifndef FALSE
-    #define FALSE 0
-#endif
-
+#include <wtk/wtk_foundation.h>
 #include <wtk/wtk_assert.h>
 
 #endif // _WTK_COMPAT_H_

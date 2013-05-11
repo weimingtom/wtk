@@ -65,7 +65,7 @@ wtk_image_list_id WTK_API wtk_image_list_add_icon( struct wtk_image_list* img_li
     WTK_ASSERT(img_list);
     WTK_ASSERT(icon);
 
-    return (wtk_image_list_id)(ImageList_AddIcon(img_list->hImageList, icon->hIcon) + 1);
+    return (wtk_image_list_id)(ImageList_AddIcon(img_list->hImageList, (HICON)icon->hIcon) + 1);
 }
 
 void wtk_image_list_replace( struct wtk_image_list* img_list, wtk_image_list_id id, struct wtk_image* image )
@@ -74,7 +74,7 @@ void wtk_image_list_replace( struct wtk_image_list* img_list, wtk_image_list_id 
     WTK_ASSERT(id > 0);
     WTK_ASSERT(image);
 
-    ImageList_Replace(img_list->hImageList, id - 1, image->hImage, NULL);
+    ImageList_Replace(img_list->hImageList, id - 1, (HBITMAP)image->hImage, NULL);
 }
 
 void WTK_API wtk_image_list_remove( struct wtk_image_list* img_list, wtk_image_list_id id )

@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <wtk/wtk_textbox.h>
+#include <wtk/wtk_label.h>
 
 #include "_wtk_windows.h"
 #include "_wtk_controls.h"
@@ -34,38 +34,35 @@
 #include <wtk/wtk_mouse.h>
 #include <wtk/wtk_keyboard.h>
 
-static LRESULT CALLBACK wtk_textbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+static LRESULT CALLBACK wtk_label_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
-int WTK_API wtk_textbox_init()
+int WTK_API wtk_label_init()
 {
     return TRUE;
 }
 
-struct wtk_textbox* WTK_API wtk_textbox_create( int x, int y, int width, int height, unsigned multiline, struct wtk_control* parent )
+struct wtk_label* WTK_API wtk_label_create( int x, int y, int width, int height, struct wtk_control* parent )
 {
-    struct wtk_textbox* textbox = NULL;
+    struct wtk_label* label = NULL;
     HWND hWnd;
 
     WTK_ASSERT(parent);
 
-    hWnd = CreateWindowExA(0, "EDIT", NULL, ES_LEFT | ES_AUTOHSCROLL | WS_BORDER | WS_VISIBLE | WS_CHILD | (multiline ? ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN : 0), x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
+    hWnd = CreateWindowExA(0, "STATIC", NULL, SS_LEFT | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    textbox = wtk_alloc(sizeof(struct wtk_textbox));
-    memset((void*)textbox, 0, sizeof(struct wtk_textbox));
-    textbox->control.type = WTK_CONTROL_TYPE(TextBox);
-    textbox->control.hWnd = hWnd;
-    textbox->control.font = wtk_font_default();
-    textbox->text_buffer = NULL;
-    textbox->type = WTK_TEXTBOX_TYPE(Plaintext);
-    textbox->text_align = WTK_ALIGN(Left);
-    textbox->max_len = -1;
+    label = (struct wtk_label*)wtk_alloc(sizeof(struct wtk_label));
+    memset((void*)label, 0, sizeof(struct wtk_label));
+    label->control.type = WTK_CONTROL_TYPE(Label);
+    label->control.hWnd = hWnd;
+    label->control.font = wtk_font_default();
+    label->text_align = WTK_ALIGN(Left);
 
-    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_textbox_proc));
-    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)textbox);
-    PostMessage(hWnd, WM_SETFONT, (WPARAM)textbox->control.font->hFont, TRUE);
+    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_label_proc));
+    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)label);
+    PostMessage(hWnd, WM_SETFONT, (WPARAM)label->control.font->hFont, TRUE);
     PostMessage(hWnd, WTK_ON_CREATE, 0, 0);
-    return textbox;
+    return label;
 }
 
 static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
@@ -73,15 +70,17 @@ static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
     return TRUE;
 }
 
-static LRESULT CALLBACK wtk_textbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static LRESULT CALLBACK wtk_label_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     struct wtk_control* control = (struct wtk_control*)GetPropA(hWnd, "_wtk_ctrl_ptr");
-    struct wtk_textbox* textbox = (struct wtk_textbox*)control;
+    struct wtk_label* label = (struct wtk_label*)control;
     if( !control ) return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     switch( uMsg ) {
         case WTK_ON_CREATE: {
+            HWND hWndParent = GetParent(hWnd);
             if( control->on_create_callback ) control->on_create_callback(control, WTK_EVENT(OnCreate));
+            if( hWndParent ) SendMessage(hWndParent, WTK_ON_LAYOUT_CHANGED, 0, 0);
         } break;
 
         case WTK_ON_LAYOUT_CHANGED: {
@@ -92,11 +91,41 @@ static LRESULT CALLBACK wtk_textbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, L
 
         case WM_DESTROY: {
             if( control->on_destroy_callback ) control->on_destroy_callback(control, WTK_EVENT(OnDestroy));
-            wtk_free(textbox->text_buffer);
-            wtk_free(textbox);
+            wtk_free(label);
+        } break;
+
+        case WM_LBUTTONDOWN: {
+            if( control->on_pressed_callback ) control->on_pressed_callback(control, WTK_EVENT(OnPressed), WTK_MOUSE_BTN_LEFT, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
+        } break;
+
+        case WM_MBUTTONDOWN: {
+            if( control->on_pressed_callback ) control->on_pressed_callback(control, WTK_EVENT(OnPressed), WTK_MOUSE_BTN_MIDDLE, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
+        } break;
+
+        case WM_RBUTTONDOWN: {
+            if( control->on_pressed_callback ) control->on_pressed_callback(control, WTK_EVENT(OnPressed), WTK_MOUSE_BTN_RIGHT, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
+        } break;
+
+        case WM_LBUTTONUP: {
+            if( control->on_released_callback ) control->on_released_callback(control, WTK_EVENT(OnReleased), WTK_MOUSE_BTN_LEFT, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
+        } break;
+
+        case WM_MBUTTONUP: {
+            if( control->on_released_callback ) control->on_released_callback(control, WTK_EVENT(OnReleased), WTK_MOUSE_BTN_MIDDLE, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
+        } break;
+
+        case WM_RBUTTONUP: {
+            if( control->on_released_callback ) control->on_released_callback(control, WTK_EVENT(OnReleased), WTK_MOUSE_BTN_RIGHT, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+            goto _default;
         } break;
 
         default: {
+        _default:
             return CallWindowProc((WNDPROC)GetPropA(hWnd, "_wtk_old_proc"), hWnd, uMsg, wParam, lParam);
         } break;
     }

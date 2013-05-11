@@ -54,7 +54,7 @@ struct wtk_font* WTK_API wtk_font_create( const char* font_family, unsigned int 
 
     if( !hFont ) return NULL;
 
-    font = wtk_alloc(sizeof(wtk_font));
+    font = (struct wtk_font*)wtk_alloc(sizeof(wtk_font));
     memset((void*)font, 0, sizeof(struct wtk_font));
     font->hFont = hFont;
 

@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <wtk/wtk_checkbox.h>
+#include <wtk/wtk_listview.h>
 
 #include "_wtk_windows.h"
 #include "_wtk_controls.h"
@@ -32,35 +32,86 @@
 #include <wtk/wtk_align.h>
 #include <wtk/wtk_font.h>
 
-static LRESULT CALLBACK wtk_checkbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+#include <stdarg.h>
 
-int WTK_API wtk_checkbox_init()
+static LRESULT CALLBACK wtk_listview_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
+
+int WTK_API wtk_listview_init()
 {
     return TRUE;
 }
 
-struct wtk_checkbox* WTK_API wtk_checkbox_create( int x, int y, int width, int height, struct wtk_control* parent )
+struct wtk_listview* WTK_API wtk_listview_create( int x, int y, int width, int height, struct wtk_control* parent )
 {
-    struct wtk_checkbox* checkbox = NULL;
+    struct wtk_listview* listview = NULL;
     HWND hWnd;
 
     WTK_ASSERT(parent);
 
-    hWnd = CreateWindowExA(0, "BUTTON", NULL, BS_CHECKBOX | BS_AUTOCHECKBOX | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
+    hWnd = CreateWindowExA(0, WC_LISTVIEWA, NULL, LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_VISIBLE | WS_CHILD, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    checkbox = wtk_alloc(sizeof(struct wtk_checkbox));
-    memset((void*)checkbox, 0, sizeof(struct wtk_checkbox));
-    checkbox->control.type = WTK_CONTROL_TYPE(CheckBox);
-    checkbox->control.hWnd = hWnd;
-    checkbox->control.font = wtk_font_default();
-    checkbox->text_align = WTK_ALIGN(Right);
+    listview = (struct wtk_listview*)wtk_alloc(sizeof(struct wtk_listview));
+    memset((void*)listview, 0, sizeof(struct wtk_listview));
+    listview->control.type = WTK_CONTROL_TYPE(ListView);
+    listview->control.hWnd = hWnd;
+    listview->control.font = wtk_font_default();
 
-    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_checkbox_proc));
-    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)checkbox);
-    PostMessage(hWnd, WM_SETFONT, (WPARAM)checkbox->control.font->hFont, TRUE);
+    SetPropA(hWnd, "_wtk_old_proc", (HANDLE)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)&wtk_listview_proc));
+    SetPropA(hWnd, "_wtk_ctrl_ptr", (HANDLE)listview);
+    PostMessage(hWnd, WM_SETFONT, (WPARAM)listview->control.font->hFont, TRUE);
     PostMessage(hWnd, WTK_ON_CREATE, 0, 0);
-    return checkbox;
+    ListView_SetExtendedListViewStyle(hWnd, LVS_EX_GRIDLINES | LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT);
+
+    return listview;
+}
+
+wtk_listview_column WTK_API wtk_listview_insert_column( struct wtk_listview* listview, const char* text, unsigned width )
+{
+    LVCOLUMNA lvc = { 0, };
+
+    WTK_ASSERT(listview);
+    WTK_ASSERT(text);
+
+    lvc.mask     = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
+    lvc.pszText  = (LPSTR)text;
+    lvc.cx       = width;
+    lvc.iSubItem = listview->num_columns;
+
+    return (wtk_listview_column)(ListView_InsertColumn(listview->control.hWnd, listview->num_columns++, &lvc) + 1);
+}
+
+void WTK_API wtk_listview_remove_column( struct wtk_listview* listview, wtk_listview_column column )
+{
+    WTK_ASSERT(listview);
+    WTK_ASSERT(column > 0);
+
+    ListView_DeleteColumn(listview->control.hWnd, column - 1);
+    --listview->num_columns;
+}
+
+wtk_listview_row WTK_API wtk_listview_insert_row( struct wtk_listview* listview )
+{
+    LVITEM lvi;
+
+    WTK_ASSERT(listview);
+
+    lvi.mask     = LVIF_STATE;
+    lvi.iItem    = listview->num_rows++;
+    lvi.iSubItem = 0;
+    lvi.state    = 0;
+    lvi.pszText  = NULL;
+
+    return -ListView_InsertItem(listview->control.hWnd, &lvi) - 1;
+}
+
+void WTK_API wtk_listview_remove_row( struct wtk_listview* listview, wtk_listview_row row )
+{
+    WTK_ASSERT(listview);
+    WTK_ASSERT(row < 0);
+
+    ListView_DeleteItem(listview->control.hWnd, -(row + 1));
+    --listview->num_rows;
 }
 
 static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
@@ -68,10 +119,10 @@ static BOOL CALLBACK wtk_on_layout_change_proc( HWND hWnd, LPARAM lParam ) {
     return TRUE;
 }
 
-static LRESULT CALLBACK wtk_checkbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+static LRESULT CALLBACK wtk_listview_proc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
     struct wtk_control* control = (struct wtk_control*)GetPropA(hWnd, "_wtk_ctrl_ptr");
-    struct wtk_checkbox* checkbox = (struct wtk_checkbox*)control;
+    struct wtk_listview* listview = (struct wtk_listview*)control;
     if( !control ) return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     switch( uMsg ) {
@@ -89,7 +140,7 @@ static LRESULT CALLBACK wtk_checkbox_proc( HWND hWnd, UINT uMsg, WPARAM wParam, 
 
         case WM_DESTROY: {
             if( control->on_destroy_callback ) control->on_destroy_callback(control, WTK_EVENT(OnDestroy));
-            wtk_free(checkbox);
+            wtk_free(listview);
         } break;
 
         default: {

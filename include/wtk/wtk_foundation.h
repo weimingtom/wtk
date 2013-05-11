@@ -1,5 +1,5 @@
-// =============================================================================
-// This file is part of the Windowing Toolkit.
+// This file is part of the minimalistic Windowing Toolkit.
+//
 // Copyright (C) 2012 Michael Williams <devbug@bitbyte.ca>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,15 +19,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// =============================================================================
 
-#ifndef _WTK_ASSERT_H_
-#define _WTK_ASSERT_H_
+#ifndef _WTK_FOUNDATION_H_
+#define _WTK_FOUNDATION_H_
 
-#include <wtk/wtk_foundation.h>
-#include <wtk/wtk_config.h>
+#include <foundation/foundation.h>
 
-#define WTK_ASSERT( _Condition ) \
-  assert(_Condition)
-
-#endif // _WTK_ASSERT_H_
+#endif // _WTK_FOUNDATION_H_

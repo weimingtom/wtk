@@ -79,7 +79,7 @@ struct wtk_window* WTK_API wtk_window_create( int x, int y, int width, int heigh
     hWnd = CreateWindowExA(WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW, "_wtk_window", NULL, /*WS_CLIPCHILDREN |*/ WS_OVERLAPPEDWINDOW, x, y, width, height, parent ? parent->hWnd : NULL, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    window = wtk_alloc(sizeof(struct wtk_window));
+    window = (struct wtk_window*)wtk_alloc(sizeof(struct wtk_window));
     memset((void*)window, 0, sizeof(struct wtk_window));
     window->control.type = WTK_CONTROL_TYPE(Window);
     window->control.hWnd = hWnd;

@@ -66,7 +66,7 @@ struct wtk_control* WTK_API wtk_control_create( int x, int y, unsigned int width
     hWnd = CreateWindowEx(0, "_wtk_control", NULL, WS_CHILD | WS_VISIBLE, x, y, width, height, parent->hWnd, NULL, GetModuleHandle(0), 0);
     if( !hWnd ) return NULL;
 
-    control = wtk_alloc(sizeof(wtk_control));
+    control = (struct wtk_control*)wtk_alloc(sizeof(wtk_control));
     memset((void*)control, 0, sizeof(struct wtk_control));
     control->type = WTK_CONTROL_TYPE(Base);
     control->hWnd = hWnd;

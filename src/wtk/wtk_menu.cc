@@ -48,7 +48,7 @@ struct wtk_menu* WTK_API wtk_menu_create()
     if( !hMenu ) return NULL;
 
 
-    menu = wtk_alloc(sizeof(struct wtk_menu));
+    menu = (struct wtk_menu*)wtk_alloc(sizeof(struct wtk_menu));
     memset((void*)menu, 0, sizeof(struct wtk_menu));
     menu->control.type = WTK_CONTROL_TYPE(Menu);
     menu->control.hWnd = NULL;
@@ -64,7 +64,7 @@ struct wtk_menu* WTK_API wtk_menu_create()
 void WTK_API wtk_menu_destroy( struct wtk_menu* menu )
 {
     unsigned int i = 0;
-    const unsigned int num_menu_items = GetMenuItemCount(menu->hMenu);
+    // const unsigned int num_menu_items = GetMenuItemCount(menu->hMenu);
     MENUITEMINFO menu_item_info = { sizeof(MENUITEMINFO), MIIM_ID | MIIM_SUBMENU, 0, };
 
     while( GetMenuItemInfo(menu->hMenu, i++, TRUE, &menu_item_info) ) {
@@ -125,7 +125,7 @@ struct wtk_menu_item* WTK_API wtk_menu_append( struct wtk_control* control, cons
         } break;
     }
 
-    menu_item = wtk_alloc(sizeof(struct wtk_menu_item));
+    menu_item = (struct wtk_menu_item*)wtk_alloc(sizeof(struct wtk_menu_item));
     memset((void*)menu_item, 0, sizeof(struct wtk_menu_item));
     menu_item->control.type = WTK_CONTROL_TYPE(MenuItem);
     menu_item->control.hWnd = NULL;
